@@ -1,0 +1,64 @@
+{
+  "name": "tailwind-classlist",
+  "version": "0.1.0",
+  "description": "Utilities for creating and merging lists of TailwindCSS classes",
+  "main": "index.js",
+  "scripts": {
+    "clean:dist": "rm -rf dist",
+    "build:src": "babel src --out-dir dist --copy-files --ignore \"src/**/*.test.js\"",
+    "build": "npm run test && npm run clean:dist && npm run build:src",
+    "test": "jest",
+    "test:watch": "npm test -- --watch"
+  },
+  "keywords": [
+    "tailwindcss",
+    "tailwind",
+    "css",
+    "classlist",
+    "classes"
+  ],
+  "author": "Sean Dinan <sean@dinan.dev> (seandinan.com)",
+  "license": "MIT",
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run test"
+    }
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
+    "modulePathIgnorePatterns": [
+      "<rootDir>/dist/"
+    ]
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0-0",
+    "@babel/node": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/register": "^7.0.0",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-jest": "^23.6.0",
+    "babel-loader": "^8.0.0",
+    "husky": "^1.1.2",
+    "jest": "^23.6.0",
+    "prettier": "^1.16.4",
+    "webpack": "2.4.1",
+    "webpack-cli": "^3.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seancdinan/tailwind-classlist"
+  },
+  "bugs": {
+    "url": "https://github.com/seancdinan/tailwind-classlist/issues"
+  },
+  "homepage": "https://github.com/seancdinan/tailwind-classlist#readme"
+}

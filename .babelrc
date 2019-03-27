@@ -1,0 +1,8 @@
+{
+  "presets": [
+    [ "@babel/env", { "useBuiltIns": "entry" } ],
+  ],
+  "plugins": [
+    "@babel/plugin-proposal-class-properties"
+  ]
+}
