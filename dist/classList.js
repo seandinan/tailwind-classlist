@@ -3,7 +3,7 @@
 Object.defineProperty(exports, '__esModule', {
   value: true,
 });
-exports.default = classList;
+exports.default = _classList;
 
 function _toConsumableArray(arr) {
   return (
@@ -32,7 +32,7 @@ function _arrayWithoutHoles(arr) {
   }
 }
 
-function classList(classObject) {
+function _classList(classObject) {
   var extraClasses = '';
   var classString = Object.keys(classObject)
     .reduce(function(a, key) {
@@ -82,7 +82,7 @@ function getSubclassList(classObject, key) {
         ''
           .concat(key, ':')
           .concat(subkey, ':')
-          .concat(classList(classObject[key][subkey])),
+          .concat(_classList(classObject[key][subkey])),
       ]);
     } else {
       return [].concat(_toConsumableArray(result), [

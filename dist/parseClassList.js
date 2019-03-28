@@ -3,7 +3,7 @@
 Object.defineProperty(exports, '__esModule', {
   value: true,
 });
-exports.default = parseClasses;
+exports.default = _parseClasses;
 
 var _standaloneClasses = _interopRequireDefault(
   require('./constants/standaloneClasses')
@@ -114,7 +114,7 @@ var isClassnameStart = function isClassnameStart(val) {
   return val.match(classNameRegex) && val.split(classNameRegex);
 };
 
-function parseClasses(classList) {
+function _parseClasses(classList) {
   var extraClasses = [];
   var parsedClasses = classList
     .split(' ')

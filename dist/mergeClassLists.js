@@ -3,7 +3,7 @@
 Object.defineProperty(exports, '__esModule', {
   value: true,
 });
-exports.default = mergeClassLists;
+exports.default = _mergeClassLists;
 
 var _classList = _interopRequireDefault(require('./classList'));
 
@@ -102,7 +102,7 @@ var getCommonValues = function getCommonValues(arr1, arr2) {
   });
 };
 
-function mergeClassLists() {
+function _mergeClassLists() {
   var classLists = Array.prototype.slice
     .call(arguments)
     .map(_parseClassList.default); // Each successive classList object overwrites the previous one
@@ -150,7 +150,7 @@ function mergeClassLists() {
           }
         } else if (classes[key] instanceof Object) {
           classes[key] = (0, _parseClassList.default)(
-            mergeClassLists(
+            _mergeClassLists(
               (0, _classList.default)(classes[key]),
               (0, _classList.default)(b[key])
             )

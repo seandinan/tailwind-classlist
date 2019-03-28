@@ -14,7 +14,7 @@ const includes = (val) => (arr) => arr.includes(val);
 
 const getCommonValues = (arr1, arr2) => arr1.filter((v) => arr2.includes(v));
 
-export default function mergeClassLists() {
+export default function _mergeClassLists() {
   const classLists = [...arguments].map(parseClasses);
   // Each successive classList object overwrites the previous one
   // Use the combinations in the constants files to determine whether or not something belongs to an overwrite family
@@ -55,7 +55,7 @@ export default function mergeClassLists() {
           }
         } else if (classes[key] instanceof Object) {
           classes[key] = parseClasses(
-            mergeClassLists(classList(classes[key]), classList(b[key]))
+            _mergeClassLists(classList(classes[key]), classList(b[key]))
           );
         } else {
           console.error('unable to process key: ', key);

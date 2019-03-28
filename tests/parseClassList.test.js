@@ -1,4 +1,4 @@
-import parseClassList from './../src/parseClassList';
+import { parseClassList } from './../index';
 
 describe('parseClassList', () => {
   it('parses a basic TailwindCSS classlist', () => {

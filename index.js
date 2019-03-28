@@ -1,9 +1,5 @@
-var classList = require('./dist/classList');
-var mergeClassLists = require('./dist/mergeClassLists');
-var parseClassList = require('./dist/parseClassList');
-
 module.exports = {
-  classList: classList,
-  mergeClassLists: mergeClassLists,
-  parseClassList: parseClassList,
+  classList: require('./dist/classList').default,
+  mergeClassLists: require('./dist/mergeClassLists').default,
+  parseClassList: require('./dist/parseClassList').default,
 };

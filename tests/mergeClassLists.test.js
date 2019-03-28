@@ -1,4 +1,4 @@
-import mergeClassLists from '../src/mergeClassLists';
+import { mergeClassLists } from './../index';
 
 describe('mergeClassList', () => {
   it('merges 2 basic classLists together', () => {

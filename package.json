@@ -1,12 +1,12 @@
 {
   "name": "tailwind-classlist",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Utilities for creating and merging lists of TailwindCSS classes",
   "main": "index.js",
   "scripts": {
     "clean:dist": "rm -rf dist",
     "build:src": "babel src --out-dir dist --copy-files --ignore \"src/**/*.test.js\"",
-    "build": "npm run test && npm run clean:dist && npm run build:src",
+    "build": "npm run clean:dist && npm run build:src && npm run test",
     "test": "jest",
     "test:watch": "npm test -- --watch"
   },

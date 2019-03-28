@@ -1,4 +1,4 @@
-export default function classList(classObject) {
+export default function _classList(classObject) {
   let extraClasses = '';
   const classString = Object.keys(classObject)
     .reduce((a, key) => {
@@ -33,7 +33,7 @@ function getSubclassList(classObject, key) {
     } else if (classObject[key][subkey] instanceof Object) {
       return [
         ...result,
-        `${key}:${subkey}:${classList(classObject[key][subkey])}`,
+        `${key}:${subkey}:${_classList(classObject[key][subkey])}`,
       ];
     } else {
       return [...result, `${key}:${subkey}-${classObject[key][subkey]}`];

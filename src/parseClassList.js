@@ -29,7 +29,7 @@ const isClassnameStart = (val) => {
   return val.match(classNameRegex) && val.split(classNameRegex);
 };
 
-export default function parseClasses(classList) {
+export default function _parseClasses(classList) {
   let extraClasses = [];
   const parsedClasses = classList
     .split(' ')
