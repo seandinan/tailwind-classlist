@@ -20,7 +20,7 @@ describe('mergeClassList', () => {
   it('merges 2 classLists with multiple batched key values together', () => {
     const a = 'bg-blue bg-bottom text-xs m-4 static';
     const b = 'bg-red p-4 text-lg fixed';
-    const result = 'bg-bottom bg-red text-lg m-4 fixed p-4';
+    const result = 'bg-bottom bg-red text-lg m-4 p-4 fixed';
     expect(mergeClassLists(a, b)).toEqual(result);
   });
 
@@ -30,7 +30,7 @@ describe('mergeClassList', () => {
     const result = 'sc-0dWm9Vdw2 test-class bg-red text-xs fixed';
     expect(mergeClassLists(a, b)).toEqual(result);
   });
-  //
+
   it('merges 2 classLists with single prefixes', () => {
     const a = 'bg-blue hover:bg-blue-darker';
     const b = 'bg-red hover:bg-red-darker fixed';
@@ -44,6 +44,23 @@ describe('mergeClassList', () => {
     const b = 'bg-red md:hover:bg-red-darker hover:bg-red-darker fixed';
     const result =
       'bg-red fixed md:hover:bg-red-darker sm:hover:bg-blue-light hover:bg-red-darker';
+    expect(mergeClassLists(a, b)).toEqual(result);
+  });
+
+  it('merges 2 classLists with common keys between adjustable & standalone classes', () => {
+    const a = classList({
+      bg: 'blue-dark',
+      'inline-flex': true,
+      flex: ['col', 'no-shrink', 'no-grow'],
+      justify: 'between',
+      h: 'full',
+    });
+    const b = classList({
+      flex: true,
+    });
+
+    const result =
+      'bg-blue-dark flex flex-col flex-no-shrink flex-no-grow justify-between h-full';
     expect(mergeClassLists(a, b)).toEqual(result);
   });
 });

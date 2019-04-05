@@ -217,19 +217,26 @@ function _mergeClassLists() {
   var result = Object.keys(batchedValues).reduce(function(a, key) {
     var valuesArray = batchedValues[key];
 
-    if (key === 'standalone') {
-      return _objectSpread({}, a, overrideStandalone(key, valuesArray));
-    } else {
+    if (key !== 'standalone') {
       return _objectSpread({}, a, overrideAdjustable(key, valuesArray));
-    }
+    } else return a;
   }, {});
+
+  if (batchedValues.standalone) {
+    var standaloneList = overrideStandalone(batchedValues.standalone);
+    Object.keys(standaloneList).forEach(function(key) {
+      if (result[key]) result[key].unshift(standaloneList[key]);
+      else result[key] = [standaloneList[key]];
+    });
+  } // console.log(result);
+
   return (0, _classList.default)(_objectSpread({}, result, prefixes));
 }
 
-function overrideStandalone(key, valuesArray) {
+function overrideStandalone(valuesArray) {
   return valuesArray
     .reduce(function(valList, val) {
-      var overrideGroup = getOverrideGroups(key, val)[0];
+      var overrideGroup = getOverrideGroups('standalone', val)[0];
       return [].concat(
         _toConsumableArray(
           valList.filter(function(v) {
@@ -288,7 +295,7 @@ function getOverrideGroups(key, val) {
 function formatBatchData(key, value) {
   var isExtra = key === 'extraClasses';
 
-  if (standaloneClassesArray.includes(key)) {
+  if (standaloneClassesArray.includes(key) && isBool(value)) {
     return ['standalone', key];
   } else if (isExtra || adjustableClassesArray.includes(key)) {
     return [key, value];
