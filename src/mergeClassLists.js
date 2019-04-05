@@ -3,66 +3,116 @@ import parseClasses from './parseClassList';
 import ADJUSTABLE_CLASSES from './constants/adjustableClasses';
 import STANDALONE_CLASSES from './constants/standaloneClasses';
 
-const FLATTENED_STANDALONE_CLASSES = STANDALONE_CLASSES.reduce(
-  (a, b) => [...a, ...b],
-  []
-);
+const adjustableClassesArray = Object.keys(ADJUSTABLE_CLASSES);
+const standaloneClassesArray = STANDALONE_CLASSES.reduce((a, b) => {
+  return [...a, ...b];
+}, []);
 
-const ADJUSTABLE_CLASS_KEYS = Object.keys(ADJUSTABLE_CLASSES);
+const isString = (val) => typeof val === 'string';
+const isNumber = (val) => typeof val === 'number';
+const isBool = (val) => val === true || val === false;
+const isArray = (val) => val instanceof Array;
+const isObject = (val) => val instanceof Object;
 
-const includes = (val) => (arr) => arr.includes(val);
-
-const getCommonValues = (arr1, arr2) => arr1.filter((v) => arr2.includes(v));
+const isBasicValue = (val) => {
+  return isString(val) || isNumber(val) || isBool(val);
+};
 
 export default function _mergeClassLists() {
-  const classLists = [...arguments].map(parseClasses);
-  // Each successive classList object overwrites the previous one
-  // Use the combinations in the constants files to determine whether or not something belongs to an overwrite family
-  let result = classLists.reduce((a, b) => {
-    let classes = { ...a };
-    Object.keys(b).forEach((key) => {
-      if (!classes[key]) {
-        if (FLATTENED_STANDALONE_CLASSES.includes(key)) {
-          const category = STANDALONE_CLASSES.filter(includes(key))[0];
-          const matches = getCommonValues(Object.keys(classes), category);
-          if (matches.length > 0) delete classes[matches[0]];
-          classes[key] = b[key];
-        } else {
-          classes[key] = b[key];
-        }
-      } else {
-        if (key === 'extraClasses') {
-          classes[key] += ` ${b[key]}`;
-        } else if (FLATTENED_STANDALONE_CLASSES.includes(key)) {
-          // It's fine as it is (value will just be `true`).
-          return;
-        } else if (ADJUSTABLE_CLASS_KEYS.includes(key)) {
-          // Iterate through array of arrays to see where the value is
-          const category = ADJUSTABLE_CLASSES[key].filter(includes(b[key]))[0];
-          if (typeof classes[key] === 'string') {
-            if (category.includes(classes[key])) {
-              // It needs to to be overwritten
-              classes[key] = b[key];
-            }
-          } else if (classes[key] instanceof Array) {
-            classes[key] = classes[key].map((existingVal) => {
-              if (category.includes(existingVal)) {
-                return b[key];
-              } else return existingVal;
-            });
-          } else {
-            console.error('unable to process key: ', key);
-          }
-        } else if (classes[key] instanceof Object) {
-          classes[key] = parseClasses(
-            _mergeClassLists(classList(classes[key]), classList(b[key]))
+  // Parse the classes lists into objects
+  const parsedClasses = [...arguments].map(parseClasses);
+  let prefixes = {};
+
+  // Convert the classes object into an array of [ key, value ] pairs
+  let classArray = parsedClasses.reduce((classObjArray, classObj) => {
+    let classes = [];
+    Object.keys(classObj).forEach((key) => {
+      if (isBasicValue(classObj[key])) {
+        classes.push([key, classObj[key]]);
+      } else if (isArray(classObj[key])) {
+        classes.push(...classObj[key].map((val) => [key, val]));
+      } else if (isObject(classObj[key])) {
+        if (prefixes[key]) {
+          prefixes[key] = parseClasses(
+            _mergeClassLists(...[prefixes[key], classObj[key]].map(classList))
           );
         } else {
-          console.error('unable to process key: ', key);
+          prefixes[key] = classObj[key];
         }
+      } else {
+        throw new Error(`Unable to process key: ${key}`);
       }
     });
-    return classes;
+    return [...classObjArray, ...classes];
+  }, []);
+
+  // Group the individual values together
+  let batchedValues = classArray.reduce((a, [key, value]) => {
+    const [batchKey, batchValue] = formatBatchData(key, value);
+    return {
+      ...a,
+      [batchKey]: a[batchKey] ? [...a[batchKey], batchValue] : [batchValue],
+    };
   }, {});
-  return classList(result);
+  const result = Object.keys(batchedValues).reduce((a, key) => {
+    const valuesArray = batchedValues[key];
+    if (key === 'standalone') {
+      return { ...a, ...overrideStandalone(key, valuesArray) };
+    } else {
+      return { ...a, ...overrideAdjustable(key, valuesArray) };
+    }
+  }, {});
+  return classList({ ...result, ...prefixes });
+}
+
+function overrideStandalone(key, valuesArray) {
+  return valuesArray
+    .reduce((valList, val) => {
+      const overrideGroup = getOverrideGroups(key, val)[0];
+      return [...valList.filter((v) => !overrideGroup.includes(v)), val];
+    }, [])
+    .reduce((a, b) => {
+      return { ...a, [b]: true };
+    }, {});
+}
+
+function overrideAdjustable(key, valuesArray) {
+  if (valuesArray.length > 1) {
+    return {
+      [key]: valuesArray.reduce((valList, val) => {
+        const overrideGroups = getOverrideGroups(key, val);
+        const removeOverridenValues = (v) => {
+          return !overrideGroups.reduce((a, group) => {
+            return a || group.includes(v);
+          }, false);
+        };
+        return [...valList.filter(removeOverridenValues), val];
+      }, []),
+    };
+  } else {
+    return { [key]: valuesArray };
+  }
+}
+
+function getOverrideGroups(key, val) {
+  if (key === 'standalone' && standaloneClassesArray.includes(val)) {
+    return STANDALONE_CLASSES.filter((c) => c.includes(val));
+  } else if (adjustableClassesArray.includes(key)) {
+    return ADJUSTABLE_CLASSES[key].filter((c) => c.includes(val));
+  } else if (key === 'extraClasses') {
+    return [[]];
+  } else {
+    throw Error(`Unrecognized key: ${key}`);
+  }
+}
+
+function formatBatchData(key, value) {
+  const isExtra = key === 'extraClasses';
+  if (standaloneClassesArray.includes(key)) {
+    return ['standalone', key];
+  } else if (isExtra || adjustableClassesArray.includes(key)) {
+    return [key, value];
+  } else {
+    throw Error(`Unrecognized key: ${key}`);
+  }
 }

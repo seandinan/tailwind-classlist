@@ -37,7 +37,7 @@ function _classList(classObject) {
   var classString = Object.keys(classObject)
     .reduce(function(a, key) {
       if (key === 'extraClasses') {
-        extraClasses += ''.concat(classObject[key], ' ');
+        extraClasses += ''.concat(classObject[key].join(' '), ' ');
         return a;
       }
 

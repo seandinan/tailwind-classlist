@@ -53,6 +53,47 @@ function _defineProperty(obj, key, value) {
   return obj;
 }
 
+function _slicedToArray(arr, i) {
+  return (
+    _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest()
+  );
+}
+
+function _nonIterableRest() {
+  throw new TypeError('Invalid attempt to destructure non-iterable instance');
+}
+
+function _iterableToArrayLimit(arr, i) {
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (
+      var _i = arr[Symbol.iterator](), _s;
+      !(_n = (_s = _i.next()).done);
+      _n = true
+    ) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i['return'] != null) _i['return']();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
 function _toConsumableArray(arr) {
   return (
     _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread()
@@ -80,87 +121,178 @@ function _arrayWithoutHoles(arr) {
   }
 }
 
-var FLATTENED_STANDALONE_CLASSES = _standaloneClasses.default.reduce(function(
-  a,
-  b
-) {
+var adjustableClassesArray = Object.keys(_adjustableClasses.default);
+
+var standaloneClassesArray = _standaloneClasses.default.reduce(function(a, b) {
   return [].concat(_toConsumableArray(a), _toConsumableArray(b));
-},
-[]);
+}, []);
 
-var ADJUSTABLE_CLASS_KEYS = Object.keys(_adjustableClasses.default);
-
-var includes = function includes(val) {
-  return function(arr) {
-    return arr.includes(val);
-  };
+var isString = function isString(val) {
+  return typeof val === 'string';
 };
 
-var getCommonValues = function getCommonValues(arr1, arr2) {
-  return arr1.filter(function(v) {
-    return arr2.includes(v);
-  });
+var isNumber = function isNumber(val) {
+  return typeof val === 'number';
+};
+
+var isBool = function isBool(val) {
+  return val === true || val === false;
+};
+
+var isArray = function isArray(val) {
+  return val instanceof Array;
+};
+
+var isObject = function isObject(val) {
+  return val instanceof Object;
+};
+
+var isBasicValue = function isBasicValue(val) {
+  return isString(val) || isNumber(val) || isBool(val);
 };
 
 function _mergeClassLists() {
-  var classLists = Array.prototype.slice
+  // Parse the classes lists into objects
+  var parsedClasses = Array.prototype.slice
     .call(arguments)
-    .map(_parseClassList.default); // Each successive classList object overwrites the previous one
-  // Use the combinations in the constants files to determine whether or not something belongs to an overwrite family
+    .map(_parseClassList.default);
+  var prefixes = {}; // Convert the classes object into an array of [ key, value ] pairs
 
-  var result = classLists.reduce(function(a, b) {
-    var classes = _objectSpread({}, a);
-
-    Object.keys(b).forEach(function(key) {
-      if (!classes[key]) {
-        if (FLATTENED_STANDALONE_CLASSES.includes(key)) {
-          var category = _standaloneClasses.default.filter(includes(key))[0];
-
-          var matches = getCommonValues(Object.keys(classes), category);
-          if (matches.length > 0) delete classes[matches[0]];
-          classes[key] = b[key];
-        } else {
-          classes[key] = b[key];
-        }
-      } else {
-        if (key === 'extraClasses') {
-          classes[key] += ' '.concat(b[key]);
-        } else if (FLATTENED_STANDALONE_CLASSES.includes(key)) {
-          // It's fine as it is (value will just be `true`).
-          return;
-        } else if (ADJUSTABLE_CLASS_KEYS.includes(key)) {
-          // Iterate through array of arrays to see where the value is
-          var _category = _adjustableClasses.default[key].filter(
-            includes(b[key])
-          )[0];
-
-          if (typeof classes[key] === 'string') {
-            if (_category.includes(classes[key])) {
-              // It needs to to be overwritten
-              classes[key] = b[key];
-            }
-          } else if (classes[key] instanceof Array) {
-            classes[key] = classes[key].map(function(existingVal) {
-              if (_category.includes(existingVal)) {
-                return b[key];
-              } else return existingVal;
-            });
-          } else {
-            console.error('unable to process key: ', key);
-          }
-        } else if (classes[key] instanceof Object) {
-          classes[key] = (0, _parseClassList.default)(
-            _mergeClassLists(
-              (0, _classList.default)(classes[key]),
-              (0, _classList.default)(b[key])
+  var classArray = parsedClasses.reduce(function(classObjArray, classObj) {
+    var classes = [];
+    Object.keys(classObj).forEach(function(key) {
+      if (isBasicValue(classObj[key])) {
+        classes.push([key, classObj[key]]);
+      } else if (isArray(classObj[key])) {
+        classes.push.apply(
+          classes,
+          _toConsumableArray(
+            classObj[key].map(function(val) {
+              return [key, val];
+            })
+          )
+        );
+      } else if (isObject(classObj[key])) {
+        if (prefixes[key]) {
+          prefixes[key] = (0, _parseClassList.default)(
+            _mergeClassLists.apply(
+              void 0,
+              _toConsumableArray(
+                [prefixes[key], classObj[key]].map(_classList.default)
+              )
             )
           );
         } else {
-          console.error('unable to process key: ', key);
+          prefixes[key] = classObj[key];
         }
+      } else {
+        throw new Error('Unable to process key: '.concat(key));
       }
     });
-    return classes;
+    return [].concat(_toConsumableArray(classObjArray), classes);
+  }, []); // Group the individual values together
+
+  var batchedValues = classArray.reduce(function(a, _ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+      key = _ref2[0],
+      value = _ref2[1];
+
+    var _formatBatchData = formatBatchData(key, value),
+      _formatBatchData2 = _slicedToArray(_formatBatchData, 2),
+      batchKey = _formatBatchData2[0],
+      batchValue = _formatBatchData2[1];
+
+    return _objectSpread(
+      {},
+      a,
+      _defineProperty(
+        {},
+        batchKey,
+        a[batchKey]
+          ? [].concat(_toConsumableArray(a[batchKey]), [batchValue])
+          : [batchValue]
+      )
+    );
   }, {});
-  return (0, _classList.default)(result);
+  var result = Object.keys(batchedValues).reduce(function(a, key) {
+    var valuesArray = batchedValues[key];
+
+    if (key === 'standalone') {
+      return _objectSpread({}, a, overrideStandalone(key, valuesArray));
+    } else {
+      return _objectSpread({}, a, overrideAdjustable(key, valuesArray));
+    }
+  }, {});
+  return (0, _classList.default)(_objectSpread({}, result, prefixes));
+}
+
+function overrideStandalone(key, valuesArray) {
+  return valuesArray
+    .reduce(function(valList, val) {
+      var overrideGroup = getOverrideGroups(key, val)[0];
+      return [].concat(
+        _toConsumableArray(
+          valList.filter(function(v) {
+            return !overrideGroup.includes(v);
+          })
+        ),
+        [val]
+      );
+    }, [])
+    .reduce(function(a, b) {
+      return _objectSpread({}, a, _defineProperty({}, b, true));
+    }, {});
+}
+
+function overrideAdjustable(key, valuesArray) {
+  if (valuesArray.length > 1) {
+    return _defineProperty(
+      {},
+      key,
+      valuesArray.reduce(function(valList, val) {
+        var overrideGroups = getOverrideGroups(key, val);
+
+        var removeOverridenValues = function removeOverridenValues(v) {
+          return !overrideGroups.reduce(function(a, group) {
+            return a || group.includes(v);
+          }, false);
+        };
+
+        return [].concat(
+          _toConsumableArray(valList.filter(removeOverridenValues)),
+          [val]
+        );
+      }, [])
+    );
+  } else {
+    return _defineProperty({}, key, valuesArray);
+  }
+}
+
+function getOverrideGroups(key, val) {
+  if (key === 'standalone' && standaloneClassesArray.includes(val)) {
+    return _standaloneClasses.default.filter(function(c) {
+      return c.includes(val);
+    });
+  } else if (adjustableClassesArray.includes(key)) {
+    return _adjustableClasses.default[key].filter(function(c) {
+      return c.includes(val);
+    });
+  } else if (key === 'extraClasses') {
+    return [[]];
+  } else {
+    throw Error('Unrecognized key: '.concat(key));
+  }
+}
+
+function formatBatchData(key, value) {
+  var isExtra = key === 'extraClasses';
+
+  if (standaloneClassesArray.includes(key)) {
+    return ['standalone', key];
+  } else if (isExtra || adjustableClassesArray.includes(key)) {
+    return [key, value];
+  } else {
+    throw Error('Unrecognized key: '.concat(key));
+  }
 }

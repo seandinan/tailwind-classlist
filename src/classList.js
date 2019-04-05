@@ -3,7 +3,7 @@ export default function _classList(classObject) {
   const classString = Object.keys(classObject)
     .reduce((a, key) => {
       if (key === 'extraClasses') {
-        extraClasses += `${classObject[key]} `;
+        extraClasses += `${classObject[key].join(' ')} `;
         return a;
       }
       if (classObject[key] instanceof Array) {
