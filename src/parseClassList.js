@@ -90,6 +90,7 @@ export default function _parseClasses(classList) {
       }
     }, [])
     .reduce(mergeSubObject, {});
+
   return extraClasses.length > 0
     ? { ...parsedClasses, extraClasses }
     : parsedClasses;

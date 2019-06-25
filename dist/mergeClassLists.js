@@ -5,7 +5,7 @@ Object.defineProperty(exports, '__esModule', {
 });
 exports.default = _mergeClassLists;
 
-var _classList = _interopRequireDefault(require('./classList'));
+var _classList2 = _interopRequireDefault(require('./classList'));
 
 var _parseClassList = _interopRequireDefault(require('./parseClassList'));
 
@@ -178,7 +178,7 @@ function _mergeClassLists() {
             _mergeClassLists.apply(
               void 0,
               _toConsumableArray(
-                [prefixes[key], classObj[key]].map(_classList.default)
+                [prefixes[key], classObj[key]].map(_classList2.default)
               )
             )
           );
@@ -228,9 +228,9 @@ function _mergeClassLists() {
       if (result[key]) result[key].unshift(standaloneList[key]);
       else result[key] = [standaloneList[key]];
     });
-  } // console.log(result);
+  }
 
-  return (0, _classList.default)(_objectSpread({}, result, prefixes));
+  return (0, _classList2.default)(_objectSpread({}, result, prefixes));
 }
 
 function overrideStandalone(valuesArray) {

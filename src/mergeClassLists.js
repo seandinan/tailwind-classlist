@@ -1,4 +1,4 @@
-import classList from './classList';
+import _classList from './classList';
 import parseClasses from './parseClassList';
 import ADJUSTABLE_CLASSES from './constants/adjustableClasses';
 import STANDALONE_CLASSES from './constants/standaloneClasses';
@@ -22,7 +22,6 @@ export default function _mergeClassLists() {
   // Parse the classes lists into objects
   const parsedClasses = [...arguments].map(parseClasses);
   let prefixes = {};
-
   // Convert the classes object into an array of [ key, value ] pairs
   let classArray = parsedClasses.reduce((classObjArray, classObj) => {
     let classes = [];
@@ -34,7 +33,7 @@ export default function _mergeClassLists() {
       } else if (isObject(classObj[key])) {
         if (prefixes[key]) {
           prefixes[key] = parseClasses(
-            _mergeClassLists(...[prefixes[key], classObj[key]].map(classList))
+            _mergeClassLists(...[prefixes[key], classObj[key]].map(_classList))
           );
         } else {
           prefixes[key] = classObj[key];
@@ -69,8 +68,7 @@ export default function _mergeClassLists() {
       else result[key] = [standaloneList[key]];
     });
   }
-  // console.log(result);
-  return classList({ ...result, ...prefixes });
+  return _classList({ ...result, ...prefixes });
 }
 
 function overrideStandalone(valuesArray) {
