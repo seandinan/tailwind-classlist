@@ -10,12 +10,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/seancdinan/tailwind-classlist"
+    "url": "https://github.com/seandinan/tailwind-classlist"
   },
   "bugs": {
-    "url": "https://github.com/seancdinan/tailwind-classlist/issues"
+    "url": "https://github.com/seandinan/tailwind-classlist/issues"
   },
-  "homepage": "https://github.com/seancdinan/tailwind-classlist#readme",
+  "homepage": "https://github.com/seandinan/tailwind-classlist#readme",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
