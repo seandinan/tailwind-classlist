@@ -1,4 +1,8 @@
 const COLORS = [
+  'white',
+  'black',
+  'transparent',
+
   'gray-900',
   'gray-800',
   'gray-700',
@@ -7,9 +11,6 @@ const COLORS = [
   'gray-400',
   'gray-200',
   'gray-100',
-  'white',
-  'black',
-  'transparent',
 
   'red-900',
   'red-800',
